@@ -1,11 +1,12 @@
-﻿using System;
+﻿using BestFreightProject.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BestFreightProject.Entities
+namespace BestFreightProject.Dtos
 {
-    public class Excel
+    public class ExcelCreateDto
     {
         public QuotationInformation QuotationInfo { get; set; }
         public CompanyInformation CompanyInfo { get; set; }

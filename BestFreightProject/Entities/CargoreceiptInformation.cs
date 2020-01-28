@@ -9,7 +9,7 @@ namespace BestFreightProject.Entities
     {
         public string CountryOfOrigin { get; set; }
         public string RegionOfOrigin { get; set; }
-        public string City { get; set; }
+        public string CityOfOrigin { get; set; }
         public string Receipt { get; set; }
         public DateTime DepartureDate { get; set; }
     }
