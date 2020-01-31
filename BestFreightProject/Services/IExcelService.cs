@@ -10,7 +10,7 @@ namespace BestFreightProject.Services
     public interface IExcelService
     {
         FileStream GetExcel(string path);
-        void CreateExcelFile(ExcelCreateDto excelCreate);
+        bool CreateExcelFile(ExcelCreateDto excelCreate);
 
     }
 }
