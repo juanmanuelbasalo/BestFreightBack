@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BestFreightProject.Dtos;
+using BestFreightProject.Entities;
 using BestFreightProject.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,28 +17,41 @@ namespace BestFreightProject.Controllers
     {
         private readonly IExcelService excelService;
         private readonly IEmailService emailService;
+        private readonly IFreightProviderService freightProviderService;
 
         private readonly ILogger<EmailController> _logger;
 
-        public EmailController(ILogger<EmailController> logger, IExcelService excelService, IEmailService emailService)
+        public EmailController(ILogger<EmailController> logger, IExcelService excelService, 
+            IEmailService emailService, IFreightProviderService freightProviderService)
         {
             _logger = logger;
             this.excelService = excelService;
             this.emailService = emailService;
+            this.freightProviderService = freightProviderService;
         }
 
         [HttpPost("create")]
-        [ProducesResponseType(201)]
+        [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
-        public async Task<ActionResult> SendEmail([FromBody] ExcelCreateDto excelCreateDto)
+        public async Task<ActionResult> SendEmailAsync([FromBody] ExcelCreateDto excelCreateDto)
         {
             var succesfulCreate = excelService.CreateExcelFile(excelCreateDto);
             if (succesfulCreate)
             {
+                var providers = freightProviderService.GetAllProviders().Where(pro => 
+                                  pro.Country.Equals(excelCreateDto.CompanyInfo.Country) 
+                                    && pro.Service.Equals(excelCreateDto.QuotationInfo.SubFreightType)).ToList();
+
                 var file = excelService.GetExcel(@"c:\temp\MyTest.xls");
-                await emailService.SendWithAttachmentToClientAsync(@"jb_2896@hotmail.com",file);
+
+                foreach (var provider in providers)
+                {
+                    var email = provider.Email.Equals("") ? provider.Email2 : provider.Email; 
+                    await emailService.SendWithAttachmentToClientAsync(@$"{email}", file);
+                }
+
                 return Ok();
             }
 
@@ -59,6 +73,12 @@ namespace BestFreightProject.Controllers
 
             var jsonExcel = JsonConvert.SerializeObject(excelDto);
             return Ok(jsonExcel);
+        }
+
+        [HttpGet("user")]
+        public ActionResult<List<FreightProvider>> GetAllUsers()
+        {
+            return freightProviderService.GetAllProviders().ToList();
         }
     }
 }
